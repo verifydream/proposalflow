@@ -1,18 +1,32 @@
 {
   "name": "proposalflow",
-  "version": "1.0.0",
-  "type": "module",
-  "description": "ProposalFlow — Dari Deal ke Duit dalam Satu Alur",
-  "main": "src/index.js",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "dev": "node --watch src/index.js",
-    "start": "node src/index.js",
-    "db:migrate": "node src/db-migrate.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
   },
   "dependencies": {
-    "express": "^4.21.0",
-    "pg": "^8.13.0",
-    "dotenv": "^16.4.0",
-    "nanoid": "^5.0.0"
+    "@supabase/supabase-js": "^2.110.7",
+    "@trpc/next": "^11.18.0",
+    "@trpc/server": "^11.18.0",
+    "nanoid": "^6.0.0",
+    "next": "16.2.10",
+    "pg": "^8.22.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
