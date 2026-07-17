@@ -44,6 +44,18 @@ export async function getProposals(projectId) {
   const { rows } = await pool.query('SELECT * FROM proposals WHERE project_id=$1 ORDER BY created_at DESC', [projectId]);
   return rows;
 }
+export async function getProposal(id) {
+  const { rows } = await pool.query('SELECT * FROM proposals WHERE id=$1', [id]);
+  return rows[0];
+}
+export async function deleteProposal(id) {
+  const { rows } = await pool.query('DELETE FROM proposals WHERE id=$1 RETURNING *', [id]);
+  return rows[0];
+}
+export async function getInvoicesByProject(projectId) {
+  const { rows } = await pool.query('SELECT * FROM invoices WHERE project_id=$1', [projectId]);
+  return rows;
+}
 export async function updateProposalStatus(id, status) {
   const { rows } = await pool.query(
     `UPDATE proposals SET status=$1,
