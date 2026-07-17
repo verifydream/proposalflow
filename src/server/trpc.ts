@@ -13,7 +13,7 @@ export const appRouter = router({
     list: t.procedure.query(async ({ ctx }) => {
       return await db.getProjects(ctx.userId);
     }),
-    create: t.procedure.input(z.object({ name: z.string(), clientId: z.number().optional(), value: z.number().optional() }))
+    create: t.procedure.input(z.object({ name: z.string(), clientId: z.number().optional(), value: z.number().int().optional() }))
       .mutation(async ({ input, ctx }) => {
         return await db.addProject(ctx.userId, input);
       }),
@@ -25,12 +25,45 @@ export const appRouter = router({
       }),
     updateStatus: t.procedure.input(z.object({ id: z.number(), status: z.string() }))
       .mutation(async ({ input }) => {
+        const currentProposal = await db.getProposal(input.id);
+        if (!currentProposal) {
+          throw new Error('Proposal not found');
+        }
+
+        const validTransitions = {
+          'draft': ['sent'],
+          'sent': ['viewed'],
+          'viewed': ['approved']
+        };
+
+        if (input.status !== currentProposal.status) {
+          const allowedNext = validTransitions[currentProposal.status] || [];
+          if (!allowedNext.includes(input.status)) {
+            throw new Error(`Invalid status transition from ${currentProposal.status} to ${input.status}`);
+          }
+        }
+
         const proposal = await db.updateProposalStatus(input.id, input.status);
         if (proposal && input.status === 'approved') {
           const project = await db.getProject(proposal.project_id);
           if (project) await db.addContract(proposal.project_id, proposal.id, { title: project.name, value: project.value });
         }
         return proposal;
+      }),
+    delete: t.procedure.input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const currentProposal = await db.getProposal(input.id);
+        if (!currentProposal) {
+          throw new Error('Proposal not found');
+        }
+
+        const invoices = await db.getInvoicesByProject(currentProposal.project_id);
+        if (invoices && invoices.length > 0) {
+          throw new Error('Cannot delete proposal because an active invoice exists for this project');
+        }
+
+        await db.deleteProposal(input.id);
+        return true;
       }),
   }),
   contracts: router({
